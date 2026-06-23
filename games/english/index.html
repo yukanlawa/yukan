@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jianshi Atayal Explorer - 尖石泰雅文化回應教學遊戲</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: 融入大自然與人文質感的字體 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans TC', 'sans-serif'],
+            outfit: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            atayalRed: '#C8252C',     // 泰雅熱情紅
+            atayalBlack: '#1C1A1A',   // 泰雅深邃黑
+            atayalForest: '#1E4620',  // 尖石山林綠
+            atayalGold: '#D4AF37',    // 豐收金黃
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 泰雅傳統編織花紋背景裝飾 */
+    .atayal-pattern-border {
+      background-image: repeating-linear-gradient(45deg, #C8252C 0px, #C8252C 10px, #1C1A1A 10px, #1C1A1A 20px, #FFFFFF 20px, #FFFFFF 30px);
+      background-size: 42px 42px;
+    }
+
+    /* 漸層與動態平滑切換 */
+    body {
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+      background-color: #F8F6F2;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .screen {
+      transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+    }
+
+    .screen.hidden-screen {
+      display: none !important;
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    /* 骨董羊皮紙質感卡片 */
+    .culture-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(200, 37, 44, 0.15);
+      box-shadow: 0 10px 30px -10px rgba(28, 26, 26, 0.1);
+    }
+
+    .platform-home-link {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+      min-width: 52px;
+      min-height: 52px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #173f2c;
+      color: #fff;
+      text-decoration: none;
+      box-shadow: 0 10px 24px rgba(24, 74, 47, 0.24);
+    }
+
+    .platform-home-link svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    /* ==========================================================================
+       列印與匯出 PDF 專用樣式 (@media print)
+       當使用者執行瀏覽器列印或儲存為 PDF 時，將所有隱藏的頁面全部展開，
+       並以 A4/簡報比例一頁一張呈現，完美防呆。
+       ========================================================================== */
+    @media print {
+      body {
+        background-color: #FFFFFF !important;
+        background-image: none !important;
+      }
+      
+      /* 強制展開所有畫面 */
+      .screen {
+        display: block !important;
+        opacity: 1 !important;
+        transform: none !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        position: relative !important;
+        height: auto !important;
+        min-height: 100vh !important;
+        padding: 2rem !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+
+      /* 隱藏互動性按鈕與計分 */
+      .interactive-btn, #score-hud, .nav-buttons, #reset-btn {
+        display: none !important;
+      }
+
+      /* 顯示所有卡片的解答與說明 */
+      .explanation-box {
+        display: block !important;
+        opacity: 1 !important;
+        max-height: none !important;
+        margin-top: 2rem !important;
+      }
+
+      /* 顯示正確答案的標誌 */
+      .correct-option {
+        border: 4px solid #1E4620 !important;
+        background-color: #F0FDF4 !important;
+      }
+
+      .correct-badge-print {
+        display: inline-block !important;
+      }
+
+      /* 限制列印圖片尺寸避免跑版 */
+      svg {
+        max-height: 250px !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden text-atayalBlack">
+  <a class="platform-home-link" href="../../index.html" target="_top" aria-label="回到平台主頁">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 10.8 12 4l8 6.8V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+    </svg>
+  </a>
+
+  <!-- ================= HEADER 頂部泰雅編織裝飾條 ================= -->
+  <header class="w-full h-4 atayal-pattern-border shadow-md"></header>
+
+  <!-- ================= 遊戲常駐計分與進度 HUD (互動時顯示) ================= -->
+  <div id="score-hud" class="hidden max-w-4xl w-full mx-auto px-6 pt-4 flex justify-between items-center text-sm md:text-base font-semibold">
+    <div class="flex items-center space-x-2 text-atayalForest bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">
+      <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
+      <span>Progress: <span id="hud-progress">1 / 3</span></span>
+    </div>
+    <div class="text-atayalRed bg-red-50 px-4 py-2 rounded-full border border-red-100">
+      Score: <span id="hud-score" class="font-bold text-lg text-atayalRed">0</span> / 30
+    </div>
+  </div>
+
+  <!-- ================= 主遊戲容器 ================= -->
+  <main class="flex-grow flex items-center justify-center p-4 md:p-8">
+    <div class="w-full max-w-4xl">
+
+      <!-- ================= SCREEN 1: 歡迎首頁 ================= -->
+      <section id="screen-welcome" class="screen flex flex-col items-center text-center culture-card rounded-3xl p-8 md:p-12 border-t-8 border-atayalRed">
+        
+        <!-- 泰雅祖靈之眼裝飾 SVG -->
+        <svg class="w-32 h-32 text-atayalRed mb-6" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 5 L95 50 L50 95 L5 50 Z" stroke="currentColor" stroke-width="4" fill="none"/>
+          <path d="M50 20 L80 50 L50 80 L20 50 Z" stroke="currentColor" stroke-width="3" fill="#C8252C" fill-opacity="0.1"/>
+          <circle cx="50" cy="50" r="10" fill="currentColor"/>
+          <path d="M5 50 H95 M50 5 V95" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4"/>
+        </svg>
+
+        <span class="text-xs md:text-sm font-bold tracking-widest text-atayalRed uppercase bg-red-50 px-3 py-1 rounded-full border border-red-100 mb-3">
+          2026 Hsinchu County Curriculum Expo 課程博覽會
+        </span>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-atayalBlack tracking-tight leading-tight">
+          Jianshi Atayal Explorer
+        </h1>
+        <p class="text-lg md:text-xl font-medium text-atayalForest mt-2 mb-6">
+          尖石泰雅文化回應教學遊戲
+        </p>
+
+        <div class="bg-stone-50 rounded-2xl p-6 text-left max-w-xl border border-stone-200/60 mb-8 text-stone-700 space-y-3">
+          <p class="font-semibold text-atayalBlack">親愛的探險家（Dear Explorers）：</p>
+          <p class="text-sm leading-relaxed">
+            歡迎來到新竹縣尖石鄉！本遊戲為配合**「文化回應教學」**與**「英語跨領域（CLIL）」**設計。你將化身為探險家，挑戰三道攸關泰雅族生態智慧、歲時祭儀與工藝美學的英語關卡。
+          </p>
+          <p class="text-sm text-atayalRed font-medium">
+            💡 提示：點擊選項後，右側將即時顯示中英文化對照解析。博覽會現場可開啟平板音效體驗喔！
+          </p>
+        </div>
+
+        <button onclick="startGame()" class="interactive-btn px-10 py-4 bg-atayalRed hover:bg-red-700 text-white font-bold text-lg md:text-xl rounded-full shadow-lg hover:shadow-xl transform active:scale-95 transition duration-150 flex items-center space-x-2">
+          <span>Start Challenge / 開始挑戰</span>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </button>
+      </section>
+
+      <!-- ================= SCREEN 2: 第一關 (植物智慧) ================= -->
+      <section id="screen-q1" class="screen hidden-screen flex flex-col culture-card rounded-3xl p-6 md:p-10 border-t-8 border-atayalForest">
+        <div class="flex items-center justify-between border-b border-stone-200 pb-4 mb-6">
+          <div>
+            <span class="text-sm font-bold text-atayalForest uppercase">Mission 01 / 任務一</span>
+            <h2 class="text-xl md:text-2xl font-bold">Ecology & Survival (生態與生存)</h2>
+          </div>
+          <span class="bg-emerald-50 text-atayalForest text-xs md:text-sm px-3 py-1.5 rounded-full font-bold border border-emerald-100">
+            Smangus Giant Trees
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- 左側問題與選項 -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="bg-stone-50 p-4 rounded-2xl border border-stone-150">
+              <p class="text-stone-500 text-xs font-semibold mb-1">Scenario / 情境故事</p>
+              <p class="text-stone-800 text-sm md:text-base leading-relaxed">
+                You are hiking in the giant tree forest in <strong>Smangus (司馬庫斯)</strong>. Suddenly, it starts raining heavily! Your Atayal guide says, "Don't worry, nature provides umbrellas."
+                <br><span class="text-xs text-stone-500">(你走在司馬庫斯的巨木林中，突然下起大雨！長老告訴你大自然就是最好的雨傘...)</span>
+              </p>
+            </div>
+            
+            <p class="font-bold text-base md:text-lg text-atayalRed">
+              Q: Which local plant do Atayal people traditionally use as a natural umbrella or shelter roof?
+              <span class="block text-xs md:text-sm text-stone-600 font-normal mt-1">(哪種尖石常見植物，最常被泰雅族人用來做天然雨傘或搭建臨時棚頂？)</span>
+            </p>
+
+            <div class="space-y-3">
+              <!-- 選項 A -->
+              <button onclick="checkAnswer(1, 'A', this)" class="interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalForest bg-white transition duration-150 flex justify-between items-center group">
+                <div>
+                  <span class="font-bold text-atayalForest mr-2">(A)</span> Cherry blossom leaves <span class="text-xs text-stone-500">(櫻花樹葉)</span>
+                </div>
+                <span class="option-icon text-lg"></span>
+              </button>
+              
+              <!-- 選項 B -->
+              <button onclick="checkAnswer(1, 'B', this)" class="interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalForest bg-white transition duration-150 flex justify-between items-center group">
+                <div>
+                  <span class="font-bold text-atayalForest mr-2">(B)</span> Stinging nettle leaves <span class="text-xs text-stone-500">(咬人貓 / Klapaw)</span>
+                </div>
+                <span class="option-icon text-lg"></span>
+              </button>
+
+              <!-- 選項 C (正確) -->
+              <button onclick="checkAnswer(1, 'C', this)" class="correct-option interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalForest bg-white transition duration-150 flex justify-between items-center group">
+                <div>
+                  <span class="font-bold text-atayalForest mr-2">(C)</span> Taiwan wild banana leaves <span class="text-xs text-stone-500">(台灣芭蕉葉 / Sgamil)</span>
+                  <span class="correct-badge-print hidden ml-2 text-emerald-600 font-bold text-xs">[正確答案]</span>
+                </div>
+                <span class="option-icon text-lg"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 右側插圖與動態解釋 -->
+          <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
+            <!-- 關卡 SVG 圖像 -->
+            <div class="bg-emerald-50/50 rounded-2xl p-4 flex items-center justify-center border border-emerald-100/50 h-44">
+              <svg class="w-full h-full text-atayalForest" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- 芭蕉葉形狀 -->
+                <path d="M20 100 C60 60, 140 40, 180 30 C150 50, 110 80, 80 110" stroke="currentColor" stroke-width="4" fill="#34D399" fill-opacity="0.2"/>
+                <path d="M80 110 C100 80, 150 40, 190 20 C140 60, 100 90, 80 110 Z" fill="#059669"/>
+                <!-- 雨滴 -->
+                <circle cx="40" cy="30" r="2" fill="#3B82F6"/>
+                <circle cx="90" cy="20" r="3" fill="#3B82F6"/>
+                <circle cx="150" cy="40" r="2" fill="#3B82F6"/>
+                <!-- 葉脈 -->
+                <path d="M80 110 L135 65 M100 95 L140 85 M120 80 L160 70 M140 65 L175 55" stroke="#10B981" stroke-width="2"/>
+              </svg>
+            </div>
+
+            <!-- 動態解釋卡片 (預設隱藏，點擊選項後展開) -->
+            <div id="explain-1" class="explanation-box hidden bg-white rounded-2xl p-4 border-2 border-dashed border-stone-200 text-sm space-y-2">
+              <div class="flex items-center space-x-2 font-bold" id="explain-title-1"></div>
+              <p class="text-stone-700 leading-relaxed" id="explain-desc-1"></p>
+              <div class="bg-stone-50 p-2.5 rounded-lg border border-stone-100 text-xs text-stone-600">
+                <strong>💡 English Key Word:</strong> <span class="text-atayalRed font-medium">Shelter</span> (庇護所 / 避雨處). 
+                <br><em>"We can use banana leaves to build a shelter."</em>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 導覽控制按鈕 -->
+        <div class="nav-buttons flex justify-end mt-8 border-t border-stone-100 pt-4">
+          <button id="next-btn-1" disabled onclick="nextScreen(2)" class="px-6 py-3 bg-stone-300 text-stone-500 font-bold rounded-full flex items-center space-x-2 cursor-not-allowed transition duration-150">
+            <span>Next Mission / 下一關</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= SCREEN 3: 第二關 (祭典分享) ================= -->
+      <section id="screen-q2" class="screen hidden-screen flex flex-col culture-card rounded-3xl p-6 md:p-10 border-t-8 border-atayalGold">
+        <div class="flex items-center justify-between border-b border-stone-200 pb-4 mb-6">
+          <div>
+            <span class="text-sm font-bold text-atayalGold uppercase">Mission 02 / 任務二</span>
+            <h2 class="text-xl md:text-2xl font-bold">Festival & Sharing Value (祭典與分享)</h2>
+          </div>
+          <span class="bg-amber-50 text-amber-700 text-xs md:text-sm px-3 py-1.5 rounded-full font-bold border border-amber-100">
+            Smyus / Harvest Festival
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- 左側問題與選項 -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="bg-stone-50 p-4 rounded-2xl border border-stone-150">
+              <p class="text-stone-500 text-xs font-semibold mb-1">Scenario / 情境故事</p>
+              <p class="text-stone-800 text-sm md:text-base leading-relaxed">
+                It’s harvest season in Jianshi! Every summer, the community celebrates the <strong>Millet Harvest Festival (Smyus)</strong>. Your family made a lot of delicious bamboo rice (竹筒飯).
+                <br><span class="text-xs text-stone-500">(尖石鄉小米豐收祭到了！全家人一起慶祝，製作了許多美味的竹筒飯...)</span>
+              </p>
+            </div>
+            
+            <p class="font-bold text-base md:text-lg text-atayalRed">
+              Q: According to the Atayal core value "Gaga", what is the best way to handle a big harvest?
+              <span class="block text-xs md:text-sm text-stone-600 font-normal mt-1">(根據泰雅族核心道德規範「Gaga」，面對豐收時最理想的做法是什麼？)</span>
+            </p>
+
+            <div class="space-y-3">
+              <!-- 選項 A -->
+              <button onclick="checkAnswer(2, 'A', this)" class="interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalGold bg-white transition duration-150 flex justify-between items-center group">
+                <div>
+                  <span class="font-bold text-amber-600 mr-2">(A)</span> Hide the food and eat it all by yourself. <span class="text-xs text-stone-500">(藏在屋裡自己吃一整年)</span>
+                </div>
+                <span class="option-icon text-lg"></span>
+              </button>
+              
+              <!-- 選項 B (正確) -->
+              <button onclick="checkAnswer(2, 'B', this)" class="correct-option interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalGold bg-white transition duration-150 flex justify-between items-center group">
+                <div>
+                  <span class="font-bold text-amber-600 mr-2">(B)</span> Share the food generously with others. <span class="text-xs text-stone-500">(與族人及旅客慷慨分享 / Pshat)</span>
+                  <span class="correct-badge-print hidden ml-2 text-emerald-600 font-bold text-xs">[正確答案]</span>
+                </div>
+                <span class="option-icon text-lg"></span>
+              </button>
+
+              <!-- 選項 C -->
+              <button onclick="checkAnswer(2, 'C', this)" class="interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalGold bg-white transition duration-150 flex justify-between items-center group">
+                <div>
+                  <span class="font-bold text-amber-600 mr-2">(C)</span> Sell the food to tourists to make money. <span class="text-xs text-stone-500">(全部拿去賣給觀光客賺大錢)</span>
+                </div>
+                <span class="option-icon text-lg"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 右側插圖與動態解釋 -->
+          <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
+            <!-- 關卡 SVG 圖像 -->
+            <div class="bg-amber-50/50 rounded-2xl p-4 flex items-center justify-center border border-amber-100/50 h-44">
+              <svg class="w-full h-full text-atayalGold" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- 小米與竹筒飯 -->
+                <rect x="50" y="50" width="16" height="60" rx="4" transform="rotate(-15 50 50)" fill="#D1FAE5" stroke="#059669" stroke-width="3"/>
+                <rect x="100" y="40" width="16" height="60" rx="4" transform="rotate(10 100 40)" fill="#D1FAE5" stroke="#059669" stroke-width="3"/>
+                <path d="M120 20 C125 15, 135 15, 140 25 C145 35, 135 45, 130 45" fill="#FCD34D"/>
+                <circle cx="130" cy="25" r="4" fill="#F59E0B"/>
+                <circle cx="135" cy="32" r="3" fill="#F59E0B"/>
+                <circle cx="125" cy="35" r="4" fill="#F59E0B"/>
+                <circle cx="138" cy="40" r="3" fill="#F59E0B"/>
+              </svg>
+            </div>
+
+            <!-- 動態解釋卡片 -->
+            <div id="explain-2" class="explanation-box hidden bg-white rounded-2xl p-4 border-2 border-dashed border-stone-200 text-sm space-y-2">
+              <div class="flex items-center space-x-2 font-bold" id="explain-title-2"></div>
+              <p class="text-stone-700 leading-relaxed" id="explain-desc-2"></p>
+              <div class="bg-stone-50 p-2.5 rounded-lg border border-stone-100 text-xs text-stone-600">
+                <strong>💡 English Key Word:</strong> <span class="text-atayalRed font-medium">Generously</span> (慷慨地 / 大方地). 
+                <br><em>"Atayal people share their crops generously."</em>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 導覽控制按鈕 -->
+        <div class="nav-buttons flex justify-end mt-8 border-t border-stone-100 pt-4">
+          <button id="next-btn-2" disabled onclick="nextScreen(3)" class="px-6 py-3 bg-stone-300 text-stone-500 font-bold rounded-full flex items-center space-x-2 cursor-not-allowed transition duration-150">
+            <span>Next Mission / 下一關</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= SCREEN 4: 第三關 (紋面織布) ================= -->
+      <section id="screen-q3" class="screen hidden-screen flex flex-col culture-card rounded-3xl p-6 md:p-10 border-t-8 border-atayalRed">
+        <div class="flex items-center justify-between border-b border-stone-200 pb-4 mb-6">
+          <div>
+            <span class="text-sm font-bold text-atayalRed uppercase">Mission 03 / 任務三</span>
+            <h2 class="text-xl md:text-2xl font-bold">Art & Ancestral Identity (工藝與認同)</h2>
+          </div>
+          <span class="bg-red-50 text-atayalRed text-xs md:text-sm px-3 py-1.5 rounded-full font-bold border border-red-100">
+            Atayal Weaving Art
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- 左側問題與選項 -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="bg-stone-50 p-4 rounded-2xl border border-stone-150">
+              <p class="text-stone-500 text-xs font-semibold mb-1">Scenario / 情境故事</p>
+              <p class="text-stone-800 text-sm md:text-base leading-relaxed">
+                You visit a weaving studio in Jianshi. You see beautiful red, black, and white patterns on the clothes. The weaver points to the <strong>diamond shapes (菱形紋)</strong>.
+                <br><span class="text-xs text-stone-500">(你參觀尖石鄉工藝教室，看著紅白黑相間的美麗布料。織女指著衣服上的「菱形紋」...)</span>
+              </p>
+            </div>
+            
+            <p class="font-bold text-base md:text-lg text-atayalRed">
+              Q: What do the traditional diamond patterns on Atayal clothing represent?
+              <span class="block text-xs md:text-sm text-stone-600 font-normal mt-1">(泰雅族傳統服飾上隨處可見的「菱形紋（Bnkis）」象徵著什麼涵義？)</span>
+            </p>
+
+            <div class="space-y-3">
+              <!-- 選項 A -->
+              <button onclick="checkAnswer(3, 'A', this)" class="interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalRed bg-white transition duration-150 flex justify-between items-center group">
+                <div>
+                  <span class="font-bold text-atayalRed mr-2">(A)</span> High mountains and rivers. <span class="text-xs text-stone-500">(高山與縱谷的地形)</span>
+                </div>
+                <span class="option-icon text-lg"></span>
+              </button>
+              
+              <!-- 選項 B -->
+              <button onclick="checkAnswer(3, 'B', this)" class="interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalRed bg-white transition duration-150 flex justify-between items-center group">
+                <div>
+                  <span class="font-bold text-atayalRed mr-2">(B)</span> Delicious wild boars. <span class="text-xs text-stone-500">(山林中奔跑的美味山豬)</span>
+                </div>
+                <span class="option-icon text-lg"></span>
+              </button>
+
+              <!-- 選項 C (正確) -->
+              <button onclick="checkAnswer(3, 'C', this)" class="correct-option interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalRed bg-white transition duration-150 flex justify-between items-center group">
+                <div>
+                  <span class="font-bold text-atayalRed mr-2">(C)</span> The eyes of the ancestors. <span class="text-xs text-stone-500">(祖靈的眼睛 / Dowm Utux)</span>
+                  <span class="correct-badge-print hidden ml-2 text-emerald-600 font-bold text-xs">[正確答案]</span>
+                </div>
+                <span class="option-icon text-lg"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 右側插圖與動態解釋 -->
+          <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
+            <!-- 關卡 SVG 圖像 -->
+            <div class="bg-red-50/50 rounded-2xl p-4 flex items-center justify-center border border-red-100/50 h-44">
+              <svg class="w-full h-full text-atayalRed" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- 傳統編織圖案組合 -->
+                <path d="M20 60 L60 20 L100 60 L60 100 Z" stroke="currentColor" stroke-width="4" fill="#C8252C" fill-opacity="0.15"/>
+                <path d="M100 60 L140 20 L180 60 L140 100 Z" stroke="currentColor" stroke-width="4" fill="#C8252C" fill-opacity="0.15"/>
+                <!-- 中心眼睛點 -->
+                <circle cx="60" cy="60" r="8" fill="#1C1A1A"/>
+                <circle cx="140" cy="60" r="8" fill="#1C1A1A"/>
+              </svg>
+            </div>
+
+            <!-- 動態解釋卡片 -->
+            <div id="explain-3" class="explanation-box hidden bg-white rounded-2xl p-4 border-2 border-dashed border-stone-200 text-sm space-y-2">
+              <div class="flex items-center space-x-2 font-bold" id="explain-title-3"></div>
+              <p class="text-stone-700 leading-relaxed" id="explain-desc-3"></p>
+              <div class="bg-stone-50 p-2.5 rounded-lg border border-stone-100 text-xs text-stone-600">
+                <strong>💡 English Key Word:</strong> <span class="text-atayalRed font-medium">Ancestors</span> (祖先 / 祖靈). 
+                <br><em>"We must respect our ancestors and follow their wisdom."</em>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 導覽控制按鈕 -->
+        <div class="nav-buttons flex justify-end mt-8 border-t border-stone-100 pt-4">
+          <button id="next-btn-3" disabled onclick="showResult()" class="px-6 py-3 bg-stone-300 text-stone-500 font-bold rounded-full flex items-center space-x-2 cursor-not-allowed transition duration-150">
+            <span>View Results / 查看成果</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= SCREEN 5: 結算報告頁 ================= -->
+      <section id="screen-result" class="screen hidden-screen flex flex-col items-center text-center culture-card rounded-3xl p-8 md:p-12 border-t-8 border-atayalRed">
+        
+        <!-- 通關成就徽章 SVG -->
+        <div class="relative w-36 h-36 mb-6">
+          <svg class="w-full h-full text-atayalGold" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="60" cy="60" r="50" fill="#FEF3C7" stroke="currentColor" stroke-width="6"/>
+            <polygon points="60,20 72,50 102,50 78,70 88,100 60,82 32,100 42,70 18,50 48,50" fill="currentColor"/>
+          </svg>
+          <!-- 內置泰雅眼睛標誌 -->
+          <div class="absolute inset-0 flex items-center justify-center">
+            <svg class="w-8 h-8 text-atayalRed mt-2" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M50 10 L90 50 L50 90 L10 50 Z" stroke="currentColor" stroke-width="8" fill="none"/>
+              <circle cx="50" cy="50" r="15" fill="currentColor"/>
+            </svg>
+          </div>
+        </div>
+
+        <h2 class="text-3xl md:text-4xl font-extrabold text-atayalBlack">Challenge Completed!</h2>
+        <p class="text-lg text-atayalForest font-semibold mt-1 mb-6">恭喜完成尖石泰雅文化探險任務！</p>
+
+        <!-- 分數顯示 -->
+        <div class="bg-stone-50 rounded-2xl p-6 w-full max-w-md border border-stone-200 mb-8">
+          <div class="text-stone-500 text-sm font-semibold uppercase tracking-wider">Your Final Score</div>
+          <div class="text-5xl md:text-6xl font-black text-atayalRed my-2 font-outfit">
+            <span id="final-score">0</span> <span class="text-2xl text-stone-400 font-normal">/ 30</span>
+          </div>
+          
+          <!-- 獲得稱號 -->
+          <div class="mt-4 pt-4 border-t border-stone-200/60">
+            <span class="text-xs text-stone-500 block font-semibold">獲得泰雅部落稱號 (Tribal Title)</span>
+            <span id="badge-title" class="inline-block mt-2 px-4 py-1.5 bg-atayalRed text-white font-bold rounded-full text-base shadow-sm">
+              載入中...
+            </span>
+          </div>
+        </div>
+
+        <!-- 成果導語與重來按鈕 -->
+        <p class="text-stone-600 text-sm max-w-md mb-8 leading-relaxed">
+          你對新竹縣尖石鄉的泰雅傳統生態（Sgamil）、共享美德（Gaga）以及祖靈守護之眼（Bnkis）有了豐富的雙語認識！歡迎分享給周圍的親朋好友一起挑戰！
+        </p>
+
+        <button id="reset-btn" onclick="resetGame()" class="interactive-btn px-8 py-3.5 bg-atayalBlack hover:bg-stone-800 text-white font-bold rounded-full shadow-md hover:shadow-lg transition transform active:scale-95 duration-150 flex items-center space-x-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17"></path></svg>
+          <span>Restart Challenge / 再玩一次</span>
+        </button>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ================= FOOTER 底部版權與新竹縣標章 ================= -->
+  <footer class="w-full bg-atayalBlack text-stone-400 text-center py-4 text-xs font-medium border-t-4 border-atayalRed mt-8">
+    <div class="max-w-4xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+      <div>
+        © 2026 新竹縣尖石鄉雙語教案成果展・文化回應教學遊戲
+      </div>
+      <div class="text-stone-500">
+        適合平板互動・支援 A4 離線簡報列印
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= JAVASCRIPT 遊戲控制與 Web Audio 音效 ================= -->
+  <script>
+    // 遊戲狀態追蹤
+    let score = 0;
+    let currentQuestion = 0;
+    let answered = [false, false, false, false]; // 索引 1-3 代表各題
+
+    // 各關卡詳細資料與解析內容
+    const qaData = {
+      1: {
+        correctAnswer: 'C',
+        explains: {
+          correct: {
+            title: '🎉 Correct! 答對了！',
+            bgClass: 'bg-emerald-50 border-emerald-400 text-emerald-800',
+            desc: '台灣芭蕉葉（Sgamil）碩大且表面光滑，非常適合擋雨。早期泰雅族人在深山打獵或巡視森林時遇到大雨，便會就地砍伐蕉葉搭建成「臨時獵寮（shelter）」遮雨或做防水屋頂，充滿與自然共存的智慧。'
+          },
+          incorrect: {
+            title: '❌ Oops! 答錯囉！',
+            bgClass: 'bg-red-50 border-red-400 text-red-800',
+            desc: '櫻花樹葉太小無法擋雨，而咬人貓（Klapaw）表面帶有酸性刺毛，觸碰會造成紅腫刺痛，千萬不能拿來當雨傘喔！台灣芭蕉葉才是我們祖先在森林中的萬能綠傘。'
+          }
+        }
+      },
+      2: {
+        correctAnswer: 'B',
+        explains: {
+          correct: {
+            title: '🎉 Correct! 答對了！',
+            bgClass: 'bg-amber-50 border-amber-400 text-amber-800',
+            desc: '在泰雅族傳統精神「Gaga」中，「分享與共享（Pshat / Mzyup）」是至高無上的美德。每逢小米豐收祭（Smyus），不論是自家收穫還是獵獲大獵物，都必須無私分送給整個部落，甚至招待路過的遠方遊客，共享喜悅。'
+          },
+          incorrect: {
+            title: '❌ Oops! 答錯囉！',
+            bgClass: 'bg-red-50 border-red-400 text-red-800',
+            desc: '在泰雅族的傳統社會中，獨佔糧食或一味追求個人商業交易是違反社會倫理（Gaga）的。祖先教導我們，透過慷慨地與他人分享（Share），整個部落才能共存、共榮，建立深厚的情感紐帶。'
+          }
+        }
+      },
+      3: {
+        correctAnswer: 'C',
+        explains: {
+          correct: {
+            title: '🎉 Correct! 答對了！',
+            bgClass: 'bg-red-50 border-red-400 text-red-800',
+            desc: '泰雅織布上最著名的菱形幾何花紋，象徵「祖靈的眼睛（Dowm Utux）」。它代表著祖先無時無刻的守護與看顧，同時也時時叮嚀子孫要恪守 Gaga 的道德規範。唯有認真生活、秉持誠信的人，死後才能通過彩虹橋。'
+          },
+          incorrect: {
+            title: '❌ Oops! 答錯囉！',
+            bgClass: 'bg-red-50 border-red-400 text-red-800',
+            desc: '雖然尖石鄉高山環繞、生態豐富，但傳統織布上繁複的菱形紋並不是代表高山或山豬，而是意義非凡的「祖靈之眼」。它守護著穿上這件衣服的每一位族人。'
+          }
+        }
+      }
+    };
+
+    // ==========================================
+    // Web Audio API 聲音合成器
+    // ==========================================
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioCtx;
+    }
+
+    // 播放答對音效：清脆的上行和弦 (C5 -> E5 -> G5)
+    function playCorrectSound() {
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const freqs = [523.25, 659.25, 783.99]; // C5, E5, G5
+        
+        freqs.forEach((freq, index) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + index * 0.08);
+          
+          gain.gain.setValueAtTime(0.15, now + index * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.08 + 0.3);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + index * 0.08);
+          osc.stop(now + index * 0.08 + 0.35);
+        });
+      } catch (e) {
+        console.log("Audio play blocked or unsupported:", e);
+      }
+    }
+
+    // 播放答錯音效：低沉的警示音 (G3 -> F#3)
+    function playIncorrectSound() {
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(196.00, now); // G3
+        osc.frequency.linearRampToValueAtTime(147.00, now + 0.25); // D3
+        
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } catch (e) {
+        console.log("Audio play blocked or unsupported:", e);
+      }
+    }
+
+    // 播放通關慶祝音效：璀璨的終點凱歌
+    function playVictorySound() {
+      try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50]; // C4 -> C6 大和弦
+        
+        notes.forEach((freq, index) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + index * 0.06);
+          
+          gain.gain.setValueAtTime(0.1, now + index * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.06 + 0.5);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + index * 0.06);
+          osc.stop(now + index * 0.06 + 0.6);
+        });
+      } catch (e) {
+        console.log("Audio play blocked or unsupported:", e);
+      }
+    }
+
+    // ==========================================
+    // 遊戲流程控制
+    // ==========================================
+
+    function startGame() {
+      // 激活聲音環境
+      getAudioContext();
+      
+      document.getElementById('screen-welcome').classList.add('hidden-screen');
+      document.getElementById('screen-q1').classList.remove('hidden-screen');
+      document.getElementById('score-hud').classList.remove('hidden');
+      currentQuestion = 1;
+      updateHud();
+    }
+
+    function checkAnswer(qNum, choice, btnElement) {
+      if (answered[qNum]) return; // 防重複點擊
+      answered[qNum] = true;
+
+      const qInfo = qaData[qNum];
+      const isCorrect = (choice === qInfo.correctAnswer);
+      const explainBox = document.getElementById(`explain-${qNum}`);
+      const explainTitle = document.getElementById(`explain-title-${qNum}`);
+      const explainDesc = document.getElementById(`explain-desc-${qNum}`);
+      const nextBtn = document.getElementById(`next-btn-${qNum}`);
+
+      // 禁用該關卡內所有選項按鈕的 hover 與 click 效果
+      const buttons = btnElement.parentElement.querySelectorAll('button');
+      buttons.forEach(btn => {
+        btn.classList.remove('hover:border-atayalForest', 'hover:border-atayalGold', 'hover:border-atayalRed');
+        btn.style.cursor = 'default';
+      });
+
+      if (isCorrect) {
+        score += 10;
+        playCorrectSound();
+        
+        // 答對按鈕樣式
+        btnElement.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-800');
+        btnElement.querySelector('.option-icon').innerHTML = '🟢';
+        
+        // 填充解釋內容
+        explainTitle.innerHTML = `<span class="text-emerald-600">🏆 ${qInfo.explains.correct.title}</span>`;
+        explainDesc.innerText = qInfo.explains.correct.desc;
+        explainBox.className = `explanation-box mt-4 p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50/40 text-sm space-y-2 block`;
+      } else {
+        playIncorrectSound();
+        
+        // 答錯按鈕樣式
+        btnElement.classList.add('bg-red-50', 'border-red-400', 'text-red-700');
+        btnElement.querySelector('.option-icon').innerHTML = '❌';
+
+        // 同時將正確答案醒目提示出來
+        buttons.forEach(btn => {
+          if (btn.classList.contains('correct-option')) {
+            btn.classList.add('bg-emerald-50/50', 'border-emerald-400', 'text-emerald-800');
+            btn.querySelector('.option-icon').innerHTML = '🟢';
+          }
+        });
+
+        // 填充解釋內容
+        explainTitle.innerHTML = `<span class="text-red-600">💡 ${qInfo.explains.incorrect.title}</span>`;
+        explainDesc.innerText = qInfo.explains.incorrect.desc;
+        explainBox.className = `explanation-box mt-4 p-4 rounded-2xl border-2 border-red-300 bg-red-50/40 text-sm space-y-2 block`;
+      }
+
+      // 更新進度與分數 HUD
+      updateHud();
+
+      // 啟用下一步按鈕
+      nextBtn.disabled = false;
+      nextBtn.classList.remove('bg-stone-300', 'text-stone-500', 'cursor-not-allowed');
+      nextBtn.classList.add('bg-atayalRed', 'text-white', 'hover:bg-red-700', 'shadow-md', 'active:scale-95');
+    }
+
+    function nextScreen(nextQ) {
+      // 隱藏當前關卡
+      document.getElementById(`screen-q${nextQ - 1}`).classList.add('hidden-screen');
+      // 顯示下一關
+      document.getElementById(`screen-q${nextQ}`).classList.remove('hidden-screen');
+      currentQuestion = nextQ;
+      updateHud();
+    }
+
+    function updateHud() {
+      document.getElementById('hud-progress').innerText = `${currentQuestion} / 3`;
+      document.getElementById('hud-score').innerText = score;
+    }
+
+    function showResult() {
+      // 隱藏最後一關與常駐 HUD
+      document.getElementById('screen-q3').classList.add('hidden-screen');
+      document.getElementById('score-hud').classList.add('hidden');
+      
+      // 顯示結算頁
+      const resultScreen = document.getElementById('screen-result');
+      resultScreen.classList.remove('hidden-screen');
+
+      // 設定最終分數
+      document.getElementById('final-score').innerText = score;
+
+      // 依據分數給予稱號與評價
+      const badgeTitle = document.getElementById('badge-title');
+      if (score === 30) {
+        badgeTitle.innerText = '🛡️ Atayal Grand Warrior / 泰雅大勇士與織女 👑';
+        badgeTitle.className = 'inline-block mt-2 px-6 py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-black rounded-full text-base shadow-md';
+      } else if (score === 20) {
+        badgeTitle.innerText = '🌿 Tribe Guardian / 部落守護使者';
+        badgeTitle.className = 'inline-block mt-2 px-5 py-2 bg-atayalForest text-white font-bold rounded-full text-base shadow-sm';
+      } else {
+        badgeTitle.innerText = '🔥 Tribe Learner / 泰雅文化學習者';
+        badgeTitle.className = 'inline-block mt-2 px-5 py-2 bg-stone-600 text-white font-bold rounded-full text-base shadow-sm';
+      }
+
+      playVictorySound();
+    }
+
+    function resetGame() {
+      // 重設狀態
+      score = 0;
+      currentQuestion = 0;
+      answered = [false, false, false, false];
+
+      // 重設所有按鈕與提示狀態
+      for (let i = 1; i <= 3; i++) {
+        const explainBox = document.getElementById(`explain-${i}`);
+        if (explainBox) explainBox.classList.add('hidden');
+
+        const nextBtn = document.getElementById(`next-btn-${i}`);
+        if (nextBtn) {
+          nextBtn.disabled = true;
+          nextBtn.className = 'px-6 py-3 bg-stone-300 text-stone-500 font-bold rounded-full flex items-center space-x-2 cursor-not-allowed transition duration-150';
+        }
+
+        // 清理所有題目選項按鈕樣式
+        const screenDiv = document.getElementById(`screen-q${i}`);
+        if (screenDiv) {
+          const buttons = screenDiv.querySelectorAll('.interactive-btn');
+          buttons.forEach(btn => {
+            btn.className = btn.classList.contains('correct-option') 
+              ? 'correct-option interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalGold hover:border-atayalForest hover:border-atayalRed bg-white transition duration-150 flex justify-between items-center group'
+              : 'interactive-btn w-full text-left p-4 rounded-xl border-2 border-stone-200 hover:border-atayalGold hover:border-atayalForest hover:border-atayalRed bg-white transition duration-150 flex justify-between items-center group';
+            btn.style.cursor = 'pointer';
+            btn.querySelector('.option-icon').innerHTML = '';
+          });
+        }
+      }
+
+      // 切換回歡迎頁面
+      document.getElementById('screen-result').classList.add('hidden-screen');
+      document.getElementById('screen-welcome').classList.remove('hidden-screen');
+      document.getElementById('score-hud').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

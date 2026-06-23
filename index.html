@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>泰雅文化回應闖關平台</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --forest: #173f2c;
+      --leaf: #24734d;
+      --leaf-soft: #e7f2eb;
+      --gold: #e6ae3a;
+      --gold-soft: #fff4d8;
+      --red: #bd342c;
+      --red-soft: #fde9e5;
+      --ink: #182b22;
+      --muted: #64756d;
+      --line: #d9e7de;
+      --panel: #ffffff;
+      --bg: #f5faf6;
+      --shadow: 0 18px 42px rgba(24, 74, 47, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(189, 52, 44, 0.08) 0 12px, transparent 12px 24px),
+        linear-gradient(180deg, #fffdf5 0%, var(--bg) 42%, #edf7f0 100%);
+      background-size: 48px 48px, auto;
+    }
+
+    button,
+    a {
+      font: inherit;
+    }
+
+    .page {
+      min-height: 100vh;
+    }
+
+    .home-shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    .hero {
+      min-height: 460px;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      display: grid;
+      align-items: end;
+      background:
+        linear-gradient(90deg, rgba(12, 40, 28, 0.88) 0%, rgba(12, 40, 28, 0.62) 42%, rgba(12, 40, 28, 0.2) 100%),
+        url("assets/hero-atayal.png") center / cover no-repeat;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 12px;
+      background: repeating-linear-gradient(90deg, var(--red) 0 18px, #1c1a1a 18px 36px, #fff 36px 54px, var(--gold) 54px 72px);
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      width: min(680px, 100%);
+      padding: clamp(24px, 5vw, 52px);
+      color: #fff;
+      display: grid;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      width: fit-content;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: rgba(255, 255, 255, 0.13);
+      font-size: 0.9rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .hero-copy p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: clamp(1rem, 1.7vw, 1.2rem);
+      line-height: 1.75;
+      max-width: 58ch;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 18px;
+      margin: 30px 0 16px;
+    }
+
+    .section-head h2 {
+      font-size: clamp(1.5rem, 2.4vw, 2.15rem);
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .subject-card {
+      min-height: 250px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 10px 26px rgba(24, 74, 47, 0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+      text-align: left;
+      color: var(--ink);
+    }
+
+    .subject-card:hover,
+    .subject-card:focus-visible {
+      transform: translateY(-3px);
+      border-color: rgba(36, 115, 77, 0.5);
+      box-shadow: 0 16px 34px rgba(24, 74, 47, 0.14);
+      outline: none;
+    }
+
+    .subject-top {
+      display: grid;
+      gap: 14px;
+    }
+
+    .subject-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 1.7rem;
+      font-weight: 900;
+      background: var(--leaf);
+    }
+
+    .subject-card:nth-child(2) .subject-icon,
+    .subject-card:nth-child(5) .subject-icon {
+      background: var(--red);
+    }
+
+    .subject-card:nth-child(3) .subject-icon {
+      background: #a47416;
+    }
+
+    .subject-card h3 {
+      font-size: 1.35rem;
+      letter-spacing: 0;
+    }
+
+    .subject-card p {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 0.96rem;
+    }
+
+    .subject-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      color: var(--leaf);
+      font-weight: 900;
+    }
+
+    .subject-meta span:last-child {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--leaf-soft);
+    }
+
+    .activity {
+      display: none;
+      min-height: 100vh;
+      background: #f8fbf8;
+    }
+
+    .activity.active,
+    .home.active {
+      display: block;
+    }
+
+    .home {
+      display: none;
+    }
+
+    .activity-bar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 12px clamp(14px, 3vw, 28px);
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+
+    .home-button {
+      min-width: 48px;
+      min-height: 48px;
+      border: 0;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--forest);
+      cursor: pointer;
+      display: inline-grid;
+      place-items: center;
+      box-shadow: 0 10px 22px rgba(24, 74, 47, 0.2);
+    }
+
+    .home-button:hover {
+      background: var(--leaf);
+    }
+
+    .home-button svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .activity-title {
+      min-width: 0;
+    }
+
+    .activity-title h2 {
+      font-size: clamp(1.1rem, 2vw, 1.55rem);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .activity-title p {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.92rem;
+    }
+
+    .frame-wrap {
+      height: calc(100vh - 74px);
+      min-height: 620px;
+      background: #10231b;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      background: #fff;
+    }
+
+    .link-launcher {
+      display: none;
+      width: min(940px, calc(100% - 32px));
+      margin: 34px auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .link-launcher.active {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    }
+
+    .link-art {
+      min-height: 360px;
+      background:
+        linear-gradient(180deg, rgba(23, 63, 44, 0.78), rgba(23, 63, 44, 0.48)),
+        url("assets/hero-atayal.png") center / cover no-repeat;
+      position: relative;
+    }
+
+    .link-art::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 10px;
+      background: repeating-linear-gradient(90deg, var(--red) 0 20px, #1c1a1a 20px 40px, #fff 40px 60px, var(--gold) 60px 80px);
+    }
+
+    .link-panel {
+      padding: clamp(22px, 4vw, 38px);
+      display: grid;
+      align-content: center;
+      gap: 18px;
+    }
+
+    .link-panel h3 {
+      font-size: clamp(1.55rem, 3vw, 2.35rem);
+      line-height: 1.18;
+    }
+
+    .link-panel p {
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .launch-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .launch-link {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 58px;
+      padding: 14px 16px;
+      color: var(--forest);
+      background: #fbfdfc;
+      text-decoration: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      transition: background 0.16s ease, border-color 0.16s ease;
+    }
+
+    .launch-link:hover,
+    .launch-link:focus-visible {
+      background: var(--leaf-soft);
+      border-color: rgba(36, 115, 77, 0.55);
+      outline: none;
+    }
+
+    .note {
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--gold-soft);
+      color: #72510f;
+      line-height: 1.6;
+      font-weight: 700;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      color: var(--muted);
+      line-height: 1.65;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 980px) {
+      .subject-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .subject-card:last-child {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .hero {
+        min-height: 520px;
+      }
+
+      .section-head,
+      .activity-bar,
+      .link-launcher.active {
+        align-items: stretch;
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        flex-direction: column;
+      }
+
+      .activity-bar {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+      }
+
+      .subject-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .frame-wrap {
+        min-height: 560px;
+      }
+
+      .link-art {
+        min-height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="home active" id="homeScreen">
+      <div class="home-shell">
+        <header class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow">ATAYAL LEARNING QUEST</div>
+            <h1>泰雅文化回應闖關平台</h1>
+            <p>請選擇一個主題開始挑戰。每位參賽者完成後，點回主頁圖示，就能讓下一位接續選關。</p>
+          </div>
+        </header>
+
+        <div class="section-head">
+          <div>
+            <h2>選擇今日的闖關主題</h2>
+            <p>五個學科，五條任務路徑，一起從文化情境裡探索知識。</p>
+          </div>
+        </div>
+
+        <div class="subject-grid" id="subjectGrid"></div>
+        <p class="footer-note">本平台整合國語、英語、數學、自然、社會五個主題。外部連結會以新分頁開啟，平台頁會留在原處。</p>
+      </div>
+    </section>
+
+    <section class="activity" id="activityScreen" aria-live="polite">
+      <div class="activity-bar">
+        <button class="home-button" id="homeButton" type="button" aria-label="回到主頁">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 10.8 12 4l8 6.8V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <div class="activity-title">
+          <h2 id="activityName">主題闖關</h2>
+          <p id="activitySubtitle">完成後點左側圖示回到主頁。</p>
+        </div>
+      </div>
+
+      <div class="frame-wrap" id="frameWrap">
+        <iframe id="gameFrame" title="闖關遊戲"></iframe>
+      </div>
+
+      <div class="link-launcher" id="linkLauncher">
+        <div class="link-art" aria-hidden="true"></div>
+        <div class="link-panel">
+          <div class="eyebrow" style="color: var(--leaf); border-color: var(--line); background: var(--leaf-soft);">LINK QUEST</div>
+          <h3 id="launcherTitle">開啟闖關連結</h3>
+          <p id="launcherText">這個主題使用外部網頁。請從下方按鈕開啟，完成後回到此頁按主頁圖示。</p>
+          <div class="launch-list" id="launchList"></div>
+          <div class="note">提示：若外部網站要求登入或主持權限，請依原題目平台設定操作。</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const subjects = [
+      {
+        id: "chinese",
+        icon: "國",
+        name: "國語",
+        type: "external",
+        intro: "Kahoot 題組，依年級選擇適合的挑戰。",
+        meta: "低／中／高年級",
+        subtitle: "國語 Kahoot 題組",
+        links: [
+          { label: "低年級闖關", url: "https://create.kahoot.it/details/b8dd4015-e426-4e1d-b4eb-551b5e7aed95" },
+          { label: "中年級闖關", url: "https://create.kahoot.it/details/f0aef0ea-f74d-4378-aa2a-26da2c87f046" },
+          { label: "高年級闖關", url: "https://create.kahoot.it/details/ecec0657-cefa-4721-aa5b-29ee35c94157" }
+        ]
+      },
+      {
+        id: "english",
+        icon: "英",
+        name: "英語",
+        type: "frame",
+        intro: "Jianshi Atayal Explorer，進入泰雅文化英語探索任務。",
+        meta: "本機網頁遊戲",
+        subtitle: "尖石泰雅文化回應教學遊戲",
+        url: "games/english/index.html"
+      },
+      {
+        id: "math",
+        icon: "數",
+        name: "數學",
+        type: "external",
+        intro: "泰雅情境數學任務，連到線上闖關頁。",
+        meta: "外部網頁",
+        subtitle: "數學闖關連結",
+        links: [
+          { label: "開始數學闖關", url: "https://yayut7.github.io/tayal/" }
+        ]
+      },
+      {
+        id: "science",
+        icon: "自",
+        name: "自然",
+        type: "frame",
+        intro: "觀看槓桿原理短片，挑戰泰雅陷阱與省力問題。",
+        meta: "影片＋三題問答",
+        subtitle: "槓桿原理問答小遊戲",
+        url: "games/nature/index.html"
+      },
+      {
+        id: "social",
+        icon: "社",
+        name: "社會",
+        type: "external",
+        intro: "Kahoot 社會主題題組，從文化脈絡理解地方知識。",
+        meta: "Kahoot 題組",
+        subtitle: "社會 Kahoot 題組",
+        links: [
+          { label: "開始社會闖關", url: "https://create.kahoot.it/details/9c287984-1c5f-4e0b-be32-241471edc447" }
+        ]
+      }
+    ];
+
+    const homeScreen = document.getElementById("homeScreen");
+    const activityScreen = document.getElementById("activityScreen");
+    const subjectGrid = document.getElementById("subjectGrid");
+    const homeButton = document.getElementById("homeButton");
+    const activityName = document.getElementById("activityName");
+    const activitySubtitle = document.getElementById("activitySubtitle");
+    const frameWrap = document.getElementById("frameWrap");
+    const gameFrame = document.getElementById("gameFrame");
+    const linkLauncher = document.getElementById("linkLauncher");
+    const launcherTitle = document.getElementById("launcherTitle");
+    const launcherText = document.getElementById("launcherText");
+    const launchList = document.getElementById("launchList");
+
+    function renderSubjects() {
+      subjectGrid.innerHTML = "";
+      subjects.forEach((subject) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "subject-card";
+        card.innerHTML = `
+          <div class="subject-top">
+            <div class="subject-icon" aria-hidden="true">${subject.icon}</div>
+            <div>
+              <h3>${subject.name}</h3>
+              <p>${subject.intro}</p>
+            </div>
+          </div>
+          <div class="subject-meta">
+            <span>${subject.meta}</span>
+            <span aria-hidden="true">→</span>
+          </div>
+        `;
+        card.addEventListener("click", () => openSubject(subject.id));
+        subjectGrid.appendChild(card);
+      });
+    }
+
+    function openSubject(id) {
+      const subject = subjects.find((item) => item.id === id);
+      if (!subject) return;
+
+      homeScreen.classList.remove("active");
+      activityScreen.classList.add("active");
+      activityName.textContent = `${subject.name}｜${subject.subtitle}`;
+      activitySubtitle.textContent = subject.type === "frame"
+        ? "完成後點左側主頁圖示，交給下一位參賽者。"
+        : "外部連結會開新分頁；完成後回到此頁按主頁圖示。";
+
+      if (subject.type === "frame") {
+        linkLauncher.classList.remove("active");
+        frameWrap.style.display = "block";
+        gameFrame.src = subject.url;
+      } else {
+        gameFrame.src = "";
+        frameWrap.style.display = "none";
+        linkLauncher.classList.add("active");
+        launcherTitle.textContent = `${subject.name}闖關連結`;
+        launcherText.textContent = subject.intro;
+        launchList.innerHTML = "";
+        subject.links.forEach((link) => {
+          const anchor = document.createElement("a");
+          anchor.className = "launch-link";
+          anchor.href = link.url;
+          anchor.target = "_blank";
+          anchor.rel = "noopener noreferrer";
+          anchor.innerHTML = `<span>${link.label}</span><span aria-hidden="true">開啟 ↗</span>`;
+          launchList.appendChild(anchor);
+        });
+      }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function goHome() {
+      gameFrame.src = "";
+      linkLauncher.classList.remove("active");
+      frameWrap.style.display = "block";
+      activityScreen.classList.remove("active");
+      homeScreen.classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    homeButton.addEventListener("click", goHome);
+    renderSubjects();
+  </script>
+</body>
+</html>

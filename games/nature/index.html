@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>槓桿原理問答小遊戲</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6faf7;
+      --panel: #ffffff;
+      --ink: #20312b;
+      --muted: #65756f;
+      --primary: #237a57;
+      --primary-strong: #15563c;
+      --accent: #f2b84b;
+      --soft: #e8f3ed;
+      --line: #d9e6de;
+      --danger: #b9463f;
+      --danger-soft: #fdecea;
+      --ok-soft: #e4f5eb;
+      --shadow: 0 14px 34px rgba(30, 73, 54, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(242, 184, 75, 0.18), transparent 30rem),
+        linear-gradient(180deg, #f7fbf8 0%, var(--bg) 48%, #eef7f1 100%);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 36px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(35, 122, 87, 0.24);
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.45rem, 2.4vw, 2rem);
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 0.98rem;
+    }
+
+    .status-pill {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--primary-strong);
+      font-weight: 700;
+      box-shadow: 0 8px 18px rgba(30, 73, 54, 0.08);
+    }
+
+    main {
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(217, 230, 222, 0.9);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .screen {
+      display: none;
+      min-height: 620px;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .video-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
+      gap: 0;
+      min-height: 620px;
+    }
+
+    .video-stage {
+      padding: 22px;
+      background: #10231b;
+      display: grid;
+      align-content: center;
+      gap: 16px;
+    }
+
+    video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 8px;
+      background: #000;
+      display: block;
+    }
+
+    .watch-note {
+      color: rgba(255, 255, 255, 0.86);
+      line-height: 1.7;
+      font-size: 0.96rem;
+    }
+
+    .intro-panel {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 22px;
+      background: var(--panel);
+    }
+
+    .intro-copy {
+      display: grid;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      color: var(--primary);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      font-size: 0.86rem;
+    }
+
+    .intro-panel h2,
+    .question-title,
+    .result-title {
+      font-size: clamp(1.55rem, 2.5vw, 2.35rem);
+      line-height: 1.22;
+      letter-spacing: 0;
+    }
+
+    .rule-list {
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .rule-item {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      align-items: start;
+      gap: 8px;
+    }
+
+    .rule-item span:first-child {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--primary-strong);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .lever-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #fbfdfc;
+    }
+
+    .lever-card svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 18px;
+      min-height: 48px;
+      cursor: pointer;
+      font-weight: 900;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .btn:focus-visible,
+    .option:focus-visible {
+      outline: 3px solid rgba(242, 184, 75, 0.7);
+      outline-offset: 3px;
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(35, 122, 87, 0.24);
+    }
+
+    .btn.primary:hover:not(:disabled) {
+      background: var(--primary-strong);
+      transform: translateY(-1px);
+    }
+
+    .btn.secondary {
+      border: 1px solid var(--line);
+      color: var(--primary-strong);
+      background: #fff;
+    }
+
+    .btn.secondary:hover:not(:disabled) {
+      background: var(--soft);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      box-shadow: none;
+    }
+
+    .hint {
+      min-height: 28px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .quiz-wrap {
+      padding: 28px;
+      display: grid;
+      gap: 24px;
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .progress-label {
+      font-weight: 900;
+      color: var(--primary-strong);
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 12px;
+      background: #edf4ef;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 33.333%;
+      background: linear-gradient(90deg, var(--primary), #55a26d);
+      transition: width 0.25s ease;
+    }
+
+    .question-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .question-side {
+      display: grid;
+      gap: 16px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdfc;
+    }
+
+    .question-meta {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .option {
+      width: 100%;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      background: #f5f8f6;
+      color: var(--ink);
+      padding: 18px 18px;
+      min-height: 68px;
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+    }
+
+    .option:hover:not(:disabled) {
+      border-color: rgba(35, 122, 87, 0.42);
+      background: #eef7f1;
+      transform: translateY(-1px);
+    }
+
+    .option.selected {
+      border-color: var(--primary);
+      background: var(--ok-soft);
+    }
+
+    .option.correct {
+      border-color: var(--primary);
+      background: var(--ok-soft);
+    }
+
+    .option.wrong {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .option:disabled {
+      cursor: default;
+    }
+
+    .letter {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      color: var(--primary-strong);
+      border: 1px solid var(--line);
+    }
+
+    .option-text {
+      font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .feedback {
+      min-height: 54px;
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #f5f8f6;
+      color: var(--muted);
+      line-height: 1.55;
+      border: 1px solid var(--line);
+    }
+
+    .feedback.ok {
+      background: var(--ok-soft);
+      color: var(--primary-strong);
+      border-color: #b7ddc5;
+      font-weight: 800;
+    }
+
+    .feedback.bad {
+      background: var(--danger-soft);
+      color: #8f2c27;
+      border-color: #f2c4bf;
+      font-weight: 800;
+    }
+
+    .result-wrap {
+      min-height: 620px;
+      padding: 30px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
+      gap: 26px;
+      align-items: center;
+    }
+
+    .result-copy {
+      display: grid;
+      gap: 18px;
+    }
+
+    .score-badge {
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--primary-strong);
+      font-weight: 900;
+    }
+
+    .result-message {
+      color: var(--muted);
+      font-size: 1.1rem;
+      line-height: 1.75;
+      max-width: 62ch;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .summary-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .summary-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .summary-icon.ok {
+      background: var(--ok-soft);
+      color: var(--primary-strong);
+    }
+
+    .summary-icon.bad {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .summary-text {
+      line-height: 1.55;
+    }
+
+    .certificate {
+      border-radius: 8px;
+      padding: 22px;
+      min-height: 330px;
+      border: 2px solid rgba(35, 122, 87, 0.2);
+      background:
+        linear-gradient(180deg, rgba(242, 184, 75, 0.18), rgba(255, 255, 255, 0.82)),
+        #fff;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .certificate .big {
+      font-size: clamp(3.8rem, 9vw, 6.5rem);
+      line-height: 1;
+    }
+
+    .certificate h3 {
+      font-size: clamp(1.35rem, 2vw, 1.8rem);
+    }
+
+    .certificate p {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .platform-home-link {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+      min-width: 52px;
+      min-height: 52px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #173f2c;
+      color: #fff;
+      text-decoration: none;
+      box-shadow: 0 10px 24px rgba(24, 74, 47, 0.24);
+    }
+
+    .platform-home-link svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    @media (max-width: 860px) {
+      .video-layout,
+      .question-panel,
+      .result-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .screen,
+      .video-layout,
+      .result-wrap {
+        min-height: auto;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .status-pill {
+        align-self: flex-start;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .app {
+        width: min(100% - 20px, 1080px);
+        padding: 14px 0 24px;
+      }
+
+      .video-stage,
+      .intro-panel,
+      .quiz-wrap,
+      .result-wrap {
+        padding: 16px;
+      }
+
+      .option {
+        grid-template-columns: 34px 1fr;
+        padding: 14px;
+      }
+
+      .letter {
+        width: 32px;
+        height: 32px;
+      }
+
+      .progress-row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="platform-home-link" href="../../index.html" target="_top" aria-label="回到平台主頁">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 10.8 12 4l8 6.8V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+    </svg>
+  </a>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">槓</div>
+        <div>
+          <h1>槓桿原理問答小遊戲</h1>
+          <p class="subtitle">觀看短片後挑戰三題，全對才算過關。</p>
+        </div>
+      </div>
+      <div class="status-pill" id="statusPill">影片關卡</div>
+    </header>
+
+    <main>
+      <section class="screen active" id="videoScreen" aria-labelledby="videoTitle">
+        <div class="video-layout">
+          <div class="video-stage">
+            <video id="lessonVideo" src="https://github.com/yukanlawa/yukan/releases/download/video/lever-video.mp4" controls playsinline preload="metadata"></video>
+            <p class="watch-note">請先看完影片。影片結束後，「開始答題」會自動開啟。</p>
+          </div>
+          <aside class="intro-panel">
+            <div class="intro-copy">
+              <p class="eyebrow">CHALLENGE</p>
+              <h2 id="videoTitle">泰雅陷阱與槓桿原理</h2>
+              <div class="rule-list">
+                <div class="rule-item">
+                  <span>1</span>
+                  <p>先完整觀看短片，觀察支點、施力點、抗力點。</p>
+                </div>
+                <div class="rule-item">
+                  <span>2</span>
+                  <p>接著回答三題選擇題，每題只能送出一次。</p>
+                </div>
+                <div class="rule-item">
+                  <span>3</span>
+                  <p>三題都答對才會通過關卡。</p>
+                </div>
+              </div>
+              <div class="lever-card" aria-label="槓桿示意圖">
+                <svg viewBox="0 0 420 180" role="img" aria-labelledby="leverDiagramTitle">
+                  <title id="leverDiagramTitle">支點、施力點、抗力點的槓桿示意圖</title>
+                  <rect x="42" y="86" width="336" height="18" rx="9" fill="#237a57" transform="rotate(-7 210 95)"></rect>
+                  <polygon points="210,106 184,152 236,152" fill="#f2b84b"></polygon>
+                  <circle cx="78" cy="111" r="24" fill="#e4f5eb" stroke="#237a57" stroke-width="3"></circle>
+                  <path d="M78 57v54" stroke="#237a57" stroke-width="5" stroke-linecap="round"></path>
+                  <path d="M64 72l14-18 14 18" fill="none" stroke="#237a57" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <rect x="317" y="38" width="42" height="56" rx="8" fill="#fff" stroke="#15563c" stroke-width="3"></rect>
+                  <path d="M338 95v34" stroke="#15563c" stroke-width="5" stroke-linecap="round"></path>
+                  <text x="47" y="153" fill="#15563c" font-size="18" font-weight="800">施力點</text>
+                  <text x="176" y="174" fill="#8a640e" font-size="18" font-weight="800">支點</text>
+                  <text x="302" y="27" fill="#15563c" font-size="18" font-weight="800">抗力點</text>
+                </svg>
+              </div>
+            </div>
+            <div>
+              <div class="actions">
+                <button class="btn primary" id="startBtn" type="button" disabled>開始答題</button>
+                <button class="btn secondary" id="replayBtn" type="button">從頭播放</button>
+              </div>
+              <p class="hint" id="videoHint">影片看完後就可以開始。</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="screen" id="quizScreen" aria-live="polite">
+        <div class="quiz-wrap">
+          <div class="progress-row">
+            <div class="progress-label" id="progressLabel">第 1 / 3 題</div>
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <div class="question-panel">
+            <div class="question-side">
+              <p class="eyebrow" id="questionTag">槓桿觀念</p>
+              <h2 class="question-title" id="questionTitle"></h2>
+              <p class="question-meta" id="questionMeta"></p>
+            </div>
+
+            <div>
+              <div class="options" id="options" role="list"></div>
+              <div class="feedback" id="feedback">請選擇一個答案，再送出。</div>
+              <div class="actions" style="margin-top: 14px;">
+                <button class="btn primary" id="submitBtn" type="button" disabled>送出答案</button>
+                <button class="btn secondary hidden" id="nextBtn" type="button">下一題</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="resultScreen" aria-live="polite">
+        <div class="result-wrap">
+          <div class="result-copy">
+            <div class="score-badge" id="scoreBadge">答對 0 / 3 題</div>
+            <h2 class="result-title" id="resultTitle"></h2>
+            <p class="result-message" id="resultMessage"></p>
+            <div class="summary-list" id="summaryList"></div>
+            <div class="actions">
+              <button class="btn primary" id="tryAgainBtn" type="button">再挑戰一次</button>
+              <button class="btn secondary" id="watchAgainBtn" type="button">重看影片</button>
+            </div>
+          </div>
+
+          <div class="certificate" id="certificate">
+            <div class="big" id="certificateIcon" aria-hidden="true">✓</div>
+            <h3 id="certificateTitle"></h3>
+            <p id="certificateText"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        tag: "槓桿觀念",
+        title: "構成槓桿原理的三個重點為何？",
+        meta: "想一想影片中槓桿的三個關鍵位置。",
+        options: ["支點、施力點、抗力點", "起點、平衡點、終點", "長度、重量、加速度", "重力、摩擦力、向心力"],
+        answer: 0,
+        explain: "槓桿的三個重點是支點、施力點與抗力點。"
+      },
+      {
+        tag: "文化理解",
+        title: "泰雅陷阱展現何種族群精神？",
+        meta: "這題關注影片中提到的文化態度。",
+        options: ["效率至上", "尊重萬物", "征服自然", "利益優先"],
+        answer: 1,
+        explain: "泰雅陷阱呈現與自然共處、尊重萬物的精神。"
+      },
+      {
+        tag: "省力原因",
+        title: "影片中的泰雅陷阱為何能省力？",
+        meta: "比較施力臂與抗力臂的長度，就能找到答案。",
+        options: ["施力臂長度小於抗力臂", "支點位於槓桿的正中央", "施力點與抗力點位置重合", "施力臂長度大於抗力臂"],
+        answer: 3,
+        explain: "施力臂大於抗力臂時，可以用較小的力達成效果。"
+      }
+    ];
+
+    const screens = {
+      video: document.getElementById("videoScreen"),
+      quiz: document.getElementById("quizScreen"),
+      result: document.getElementById("resultScreen")
+    };
+
+    const lessonVideo = document.getElementById("lessonVideo");
+    const startBtn = document.getElementById("startBtn");
+    const replayBtn = document.getElementById("replayBtn");
+    const videoHint = document.getElementById("videoHint");
+    const statusPill = document.getElementById("statusPill");
+    const progressLabel = document.getElementById("progressLabel");
+    const progressFill = document.getElementById("progressFill");
+    const questionTag = document.getElementById("questionTag");
+    const questionTitle = document.getElementById("questionTitle");
+    const questionMeta = document.getElementById("questionMeta");
+    const optionsEl = document.getElementById("options");
+    const feedback = document.getElementById("feedback");
+    const submitBtn = document.getElementById("submitBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const scoreBadge = document.getElementById("scoreBadge");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultMessage = document.getElementById("resultMessage");
+    const summaryList = document.getElementById("summaryList");
+    const tryAgainBtn = document.getElementById("tryAgainBtn");
+    const watchAgainBtn = document.getElementById("watchAgainBtn");
+    const certificate = document.getElementById("certificate");
+    const certificateIcon = document.getElementById("certificateIcon");
+    const certificateTitle = document.getElementById("certificateTitle");
+    const certificateText = document.getElementById("certificateText");
+
+    let currentIndex = 0;
+    let selectedIndex = null;
+    let answered = false;
+    let answers = [];
+
+    function showScreen(name) {
+      Object.values(screens).forEach((screen) => screen.classList.remove("active"));
+      screens[name].classList.add("active");
+      statusPill.textContent = name === "video" ? "影片關卡" : name === "quiz" ? "答題關卡" : "結果";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function unlockQuiz() {
+      startBtn.disabled = false;
+      videoHint.textContent = "影片已看完，可以開始答題。";
+    }
+
+    function resetQuiz() {
+      currentIndex = 0;
+      selectedIndex = null;
+      answered = false;
+      answers = [];
+      renderQuestion();
+      showScreen("quiz");
+    }
+
+    function renderQuestion() {
+      const question = questions[currentIndex];
+      selectedIndex = null;
+      answered = false;
+      progressLabel.textContent = `第 ${currentIndex + 1} / ${questions.length} 題`;
+      progressFill.style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
+      questionTag.textContent = question.tag;
+      questionTitle.textContent = question.title;
+      questionMeta.textContent = question.meta;
+      feedback.className = "feedback";
+      feedback.textContent = "請選擇一個答案，再送出。";
+      submitBtn.disabled = true;
+      submitBtn.classList.remove("hidden");
+      nextBtn.classList.add("hidden");
+      nextBtn.textContent = currentIndex === questions.length - 1 ? "看結果" : "下一題";
+
+      optionsEl.innerHTML = "";
+      question.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "option";
+        button.setAttribute("role", "listitem");
+        button.innerHTML = `<span class="letter">${String.fromCharCode(65 + index)}</span><span class="option-text">${option}</span>`;
+        button.addEventListener("click", () => selectOption(index));
+        optionsEl.appendChild(button);
+      });
+    }
+
+    function selectOption(index) {
+      if (answered) return;
+      selectedIndex = index;
+      [...optionsEl.children].forEach((button, optionIndex) => {
+        button.classList.toggle("selected", optionIndex === index);
+      });
+      submitBtn.disabled = false;
+    }
+
+    function submitAnswer() {
+      if (selectedIndex === null || answered) return;
+      answered = true;
+      const question = questions[currentIndex];
+      const isCorrect = selectedIndex === question.answer;
+      answers[currentIndex] = { selected: selectedIndex, isCorrect };
+
+      [...optionsEl.children].forEach((button, optionIndex) => {
+        button.disabled = true;
+        button.classList.remove("selected");
+        if (optionIndex === question.answer) button.classList.add("correct");
+        if (optionIndex === selectedIndex && !isCorrect) button.classList.add("wrong");
+      });
+
+      feedback.className = isCorrect ? "feedback ok" : "feedback bad";
+      feedback.textContent = isCorrect ? `答對了！${question.explain}` : `這題答錯了。${question.explain}`;
+      submitBtn.classList.add("hidden");
+      nextBtn.classList.remove("hidden");
+      nextBtn.focus();
+    }
+
+    function nextQuestion() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex += 1;
+        renderQuestion();
+        return;
+      }
+      renderResult();
+      showScreen("result");
+    }
+
+    function renderResult() {
+      const correctCount = answers.filter((answer) => answer && answer.isCorrect).length;
+      const passed = correctCount === questions.length;
+      scoreBadge.textContent = `答對 ${correctCount} / ${questions.length} 題`;
+      resultTitle.textContent = passed ? "恭喜過關！" : "還差一點，再挑戰一次";
+      resultMessage.textContent = passed
+        ? "三題全部答對，表示你已掌握槓桿原理和影片中的文化重點。"
+        : "這一關需要三題全對才算通過。看一下答題紀錄，再試一次就更有把握。";
+
+      certificate.style.background = passed
+        ? "linear-gradient(180deg, rgba(242, 184, 75, 0.18), rgba(255, 255, 255, 0.82)), #fff"
+        : "linear-gradient(180deg, rgba(185, 70, 63, 0.12), rgba(255, 255, 255, 0.86)), #fff";
+      certificateIcon.textContent = passed ? "✓" : "!";
+      certificateIcon.style.color = passed ? "var(--primary)" : "var(--danger)";
+      certificateTitle.textContent = passed ? "槓桿小達人" : "再練習一次";
+      certificateText.textContent = passed ? "已完成影片任務與三題挑戰。" : "目標是三題全對，重新挑戰即可。";
+
+      summaryList.innerHTML = "";
+      questions.forEach((question, index) => {
+        const answer = answers[index];
+        const selectedText = answer ? question.options[answer.selected] : "未作答";
+        const item = document.createElement("div");
+        item.className = "summary-item";
+        item.innerHTML = `
+          <div class="summary-icon ${answer && answer.isCorrect ? "ok" : "bad"}">${answer && answer.isCorrect ? "✓" : "!"}</div>
+          <div class="summary-text">
+            <strong>第 ${index + 1} 題：</strong>${question.title}<br>
+            你的答案：${selectedText}<br>
+            正確答案：${question.options[question.answer]}
+          </div>
+        `;
+        summaryList.appendChild(item);
+      });
+    }
+
+    lessonVideo.addEventListener("ended", unlockQuiz);
+    lessonVideo.addEventListener("timeupdate", () => {
+      if (lessonVideo.duration && lessonVideo.currentTime >= lessonVideo.duration - 0.4) {
+        unlockQuiz();
+      }
+    });
+
+    startBtn.addEventListener("click", resetQuiz);
+    replayBtn.addEventListener("click", () => {
+      lessonVideo.currentTime = 0;
+      lessonVideo.play();
+    });
+    submitBtn.addEventListener("click", submitAnswer);
+    nextBtn.addEventListener("click", nextQuestion);
+    tryAgainBtn.addEventListener("click", resetQuiz);
+    watchAgainBtn.addEventListener("click", () => {
+      lessonVideo.pause();
+      lessonVideo.currentTime = 0;
+      startBtn.disabled = true;
+      videoHint.textContent = "影片看完後就可以開始。";
+      showScreen("video");
+    });
+  </script>
+</body>
+</html>

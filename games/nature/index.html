@@ -146,6 +146,19 @@
       font-size: 0.96rem;
     }
 
+    .video-help {
+      display: grid;
+      gap: 10px;
+    }
+
+    .video-open-link {
+      align-self: start;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
     .intro-panel {
       padding: 28px;
       display: flex;
@@ -613,7 +626,10 @@
         <div class="video-layout">
           <div class="video-stage">
             <video id="lessonVideo" src="https://github.com/yukanlawa/yukan/releases/download/video/lever-video.mp4" controls playsinline preload="metadata"></video>
-            <p class="watch-note">請先看完影片。影片結束後，「開始答題」會自動開啟。</p>
+            <div class="video-help">
+              <p class="watch-note">請先看完影片。若 iPad 無法在框內播放，請點「直接開啟影片」觀看，完成後回到此頁開始答題。</p>
+              <a class="btn secondary video-open-link" href="https://github.com/yukanlawa/yukan/releases/download/video/lever-video.mp4" target="_blank" rel="noopener">直接開啟影片</a>
+            </div>
           </div>
           <aside class="intro-panel">
             <div class="intro-copy">
@@ -651,10 +667,10 @@
             </div>
             <div>
               <div class="actions">
-                <button class="btn primary" id="startBtn" type="button" disabled>開始答題</button>
+                <button class="btn primary" id="startBtn" type="button">我已看完，開始答題</button>
                 <button class="btn secondary" id="replayBtn" type="button">從頭播放</button>
               </div>
-              <p class="hint" id="videoHint">影片看完後就可以開始。</p>
+              <p class="hint" id="videoHint">影片看完後，或開新視窗觀看完成後，就可以開始。</p>
             </div>
           </aside>
         </div>
@@ -787,6 +803,11 @@
       videoHint.textContent = "影片已看完，可以開始答題。";
     }
 
+    lessonVideo.addEventListener("error", () => {
+      startBtn.disabled = false;
+      videoHint.textContent = "若影片無法在框內播放，請點「直接開啟影片」觀看，完成後再開始答題。";
+    });
+
     function resetQuiz() {
       currentIndex = 0;
       selectedIndex = null;
@@ -917,8 +938,8 @@
     watchAgainBtn.addEventListener("click", () => {
       lessonVideo.pause();
       lessonVideo.currentTime = 0;
-      startBtn.disabled = true;
-      videoHint.textContent = "影片看完後就可以開始。";
+      startBtn.disabled = false;
+      videoHint.textContent = "影片看完後，或開新視窗觀看完成後，就可以開始。";
       showScreen("video");
     });
   </script>

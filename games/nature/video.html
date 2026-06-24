@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>槓桿原理影片播放頁</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #10231b;
+      --panel: #ffffff;
+      --ink: #20312b;
+      --muted: #65756f;
+      --primary: #237a57;
+      --primary-strong: #15563c;
+      --line: #d9e6de;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(242, 184, 75, 0.18), transparent 28rem),
+        var(--bg);
+      color: #fff;
+    }
+
+    .page {
+      width: min(1080px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 32px;
+      display: grid;
+      gap: 16px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    h1,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.35rem, 4vw, 2.2rem);
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.7;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--primary-strong);
+      text-decoration: none;
+      font-weight: 900;
+    }
+
+    .video-card {
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+    }
+
+    video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      display: block;
+      background: #000;
+      border-radius: 8px;
+    }
+
+    .note {
+      margin-top: 12px;
+      font-size: 0.96rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <h1>槓桿原理影片</h1>
+        <p>看完影片後，回到自然關卡繼續答題。</p>
+      </div>
+      <a class="back-link" href="index.html?v=video-page-1">回自然關卡</a>
+    </header>
+
+    <main class="video-card">
+      <video controls playsinline webkit-playsinline preload="metadata">
+        <source src="https://github.com/yukanlawa/yukan/releases/download/video/lever-video.mp4" type="video/mp4">
+        您的瀏覽器無法直接播放影片。
+      </video>
+      <p class="note">若影片沒有自動出現，請等待幾秒或重新整理此頁。</p>
+    </main>
+  </div>
+</body>
+</html>

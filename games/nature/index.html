@@ -630,8 +630,8 @@
               您的瀏覽器無法直接播放影片，請使用下方「直接開啟影片」觀看。
             </video>
             <div class="video-help">
-              <p class="watch-note">請先看完影片。若 iPad 無法在框內播放，請點「直接開啟影片」觀看，完成後回到此頁開始答題。</p>
-              <a class="btn secondary video-open-link" href="https://github.com/yukanlawa/yukan/releases/download/video/lever-video.mp4" target="_blank" rel="noopener">直接開啟影片</a>
+              <p class="watch-note">請先看完影片。若 iPad 無法在框內播放，請點「開啟備用播放頁」觀看，完成後回到此頁開始答題。</p>
+              <a class="btn secondary video-open-link" href="video.html?v=video-page-1" target="_blank" rel="noopener">開啟備用播放頁</a>
             </div>
           </div>
           <aside class="intro-panel">
@@ -808,7 +808,7 @@
 
     lessonVideo.addEventListener("error", () => {
       startBtn.disabled = false;
-      videoHint.textContent = "若影片無法在框內播放，請點「直接開啟影片」觀看，完成後再開始答題。";
+      videoHint.textContent = "若影片無法在框內播放，請點「開啟備用播放頁」觀看，完成後再開始答題。";
     });
 
     function resetQuiz() {
